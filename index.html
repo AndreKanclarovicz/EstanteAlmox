@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estante Virtual – Estoque de TI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&family=Barlow+Semi+Condensed:wght@600;700&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eceee9;--ink:#22262b;--mut:#66706b;--paper:#fcfbf6;--steel:#6f7f78;--steel2:#58665f;--box:#d2ab74;--ac:#1f5fd1;--bd:#cfd3cc;--danger:#b3261e}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171a18;--ink:#eceee9;--mut:#9aa59f;--paper:#262b28;--steel:#4b5852;--steel2:#3a4540;--box:#8a6c43;--ac:#6c9bff;--bd:#3a423e;--danger:#ff8a80}}
+:root[data-theme="dark"]{--bg:#171a18;--ink:#eceee9;--mut:#9aa59f;--paper:#262b28;--steel:#4b5852;--steel2:#3a4540;--box:#8a6c43;--ac:#6c9bff;--bd:#3a423e;--danger:#ff8a80}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 Barlow,system-ui,sans-serif}
+h1,h2,.tag b{font-family:"Barlow Semi Condensed",Barlow,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--bd)}
+h1{font-size:24px;margin:0;flex:1 1 220px}
+button,input{font:inherit;color:inherit}
+button{background:var(--paper);border:1px solid var(--bd);border-radius:6px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--ac)}button:focus-visible,input:focus-visible,.slot:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+button.del{color:var(--danger)}
+input{background:var(--paper);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;width:100%}
+.search{flex:1 1 240px;max-width:360px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;padding:12px 18px 0}
+.tabs button.on{background:var(--steel);color:#fff;border-color:var(--steel)}
+main{padding:14px 18px 40px;max-width:1100px;margin:0 auto}
+.rack{position:relative;padding:22px 26px 26px;border-radius:18px 18px 8px 8px;border:2px solid #242a27;background:linear-gradient(160deg,#7a8780 0%,#5e6a64 45%,#48524d 100%);box-shadow:0 18px 40px #0009,inset 0 0 0 3px #97a49d,inset 0 2px 14px #ffffff44}
+.rack::before,.rack::after{content:"";position:absolute;top:14px;bottom:14px;width:12px;border-radius:6px;background:linear-gradient(90deg,#2a312d,#a3b0a9 50%,#2a312d)}
+.rack::before{left:6px}.rack::after{right:6px}
+.level{position:relative;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:flex-end;min-height:168px;padding:26px 14px 22px;margin-bottom:6px;background:linear-gradient(180deg,#2a312e 0%,#39423e 70%,#505b56 100%);box-shadow:inset 0 10px 18px #0007,inset 8px 0 14px #0005,inset -8px 0 14px #0005;overflow:hidden}
+.level::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,#ffffff14 0%,#ffffff05 30%,transparent 31%,transparent 60%,#ffffff0b 61%,transparent 80%)}
+.level::after{content:"";position:absolute;left:0;right:0;bottom:0;height:14px;background:linear-gradient(180deg,#cdd6d0 0,#8e9b94 22%,#505b56 60%,#2a312d 100%);box-shadow:0 -2px 8px #ffffff33}
+.lvname{position:absolute;top:5px;left:12px;font-size:13px;color:#cbd3ce;display:flex;gap:6px;align-items:center;z-index:2}
+.lvname button{padding:1px 8px;font-size:12px;border:0;background:transparent;color:#cbd3ce}
+.slot{position:relative;z-index:1;width:112px;padding:4px 2px 0;margin-bottom:12px;text-align:center;cursor:pointer;color:#fff;border-radius:10px;transition:transform .15s,background .15s}
+.slot:hover,.slot:focus-visible{transform:translateY(-4px);background:radial-gradient(ellipse at 50% 35%,#ffffff44,transparent 70%)}
+.slot .ic{font-size:54px;line-height:1.15;filter:drop-shadow(0 6px 5px #000a);-webkit-box-reflect:below -4px linear-gradient(transparent 60%,#ffffff22)}
+.slot .tag{margin-top:6px;font-size:12px;line-height:1.2;text-shadow:0 1px 3px #000}
+.slot .tag b{display:block;font-size:14px;font-weight:600}
+.slot .n{display:inline-block;margin-top:2px;padding:0 8px;border-radius:9px;background:#ffffff1f;font-size:11px;color:#e9eeeb}
+.slot.hit{background:radial-gradient(ellipse at 50% 40%,#ffd45acc,transparent 70%);transform:translateY(-4px)}
+.slot.empty .n{background:#b3261e88}
+.add{width:90px;height:90px;margin-bottom:16px;border:0;border-radius:50%;color:#e3e8e5;font-size:12px;background:radial-gradient(circle,#ffffff55 0,#b0bbb544 38%,transparent 70%);z-index:1}
+.add:hover{background:radial-gradient(circle,#ffffffaa 0,#ffffff55 40%,transparent 72%)}
+.modal{background:var(--paper);padding:18px;border-radius:10px;width:min(380px,92vw);display:flex;flex-direction:column;gap:10px}.modal h2{font-size:19px;margin:0}.modal label{display:flex;flex-direction:column;gap:4px}
+.panel-bg{position:fixed;inset:0;background:#0007;display:flex;justify-content:flex-end;z-index:5}
+.panel{background:var(--paper);width:min(460px,100%);height:100%;overflow:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.panel h2{margin:0;font-size:22px}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0}
+.items{list-style:none;padding:0;margin:12px 0}
+.items li{display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--bd);padding:7px 0}
+.items .nm{flex:1;min-width:0;overflow-wrap:anywhere}.items .pt{font-weight:600;white-space:nowrap}
+.items button{padding:2px 8px}
+.mut{color:var(--mut);font-size:13px}
+.res{margin:10px 0;padding:10px;background:var(--paper);border:1px solid var(--bd);border-radius:6px}
+.res div{padding:3px 0;cursor:pointer}.res div:hover{color:var(--ac)}
+</style></head><body>
+<header>
+<h1>Estante Virtual – Estoque de TI</h1>
+<input class="search" id="q" placeholder="Buscar por patrimônio ou nome…" aria-label="Buscar">
+<button id="exp">Exportar</button><button id="imp">Importar</button><button id="csv">CSV</button>
+<input type="file" id="file" accept=".json" hidden>
+</header>
+<div class="tabs" id="tabs"></div>
+<main><div id="res"></div><div id="rack"></div></main>
+<div id="pn"></div>
+<script>
+function dlg(title,fields,ok){return new Promise(res=>{const inputs=fields.map(f=>el("input",{value:f.v||"",placeholder:f.l,"aria-label":f.l}));
+const done=v=>{d.remove();res(v)};
+const d=el("div",{className:"panel-bg",style:"justify-content:center;align-items:center;z-index:10",on:{click:e=>{if(e.target===d)done(null)}}},
+el("form",{className:"modal",on:{submit:e=>{e.preventDefault();done(inputs.map(i=>i.value.trim()))}}},
+el("h2",{textContent:title}),fields.map((f,i)=>el("label",{className:"mut"},f.l,inputs[i])),
+el("div",{className:"row",style:"justify-content:flex-end"},el("button",{type:"button",textContent:"Cancelar",on:{click:()=>done(null)}}),el("button",{type:"submit",className:"pri",textContent:ok}))));
+document.body.append(d);(inputs[0]||d.querySelector("button.pri")).focus();(inputs[0]||{select(){}}).select()})}
+const ask=(t,f)=>dlg(t,f,"Salvar");const sure=m=>dlg(m,[],"Confirmar").then(v=>v!==null);
+const KEY="estoque_estante_v1";
+const I=(l,ic,items)=>({id:uid(),label:l,icon:ic,items:items||[]});
+function uid(){return Math.random().toString(36).slice(2,9)}
+function seed(){return{shelves:[{id:uid(),name:"Estante 01",levels:[
+{name:"Nível 4 (topo)",slots:[I("Monitores em garantia","🖥️"),I("Monitores Lenovo","🖥️"),I("Notebooks Acer","💻")]},
+{name:"Nível 3",slots:[I("Mini PCs / Desktops","🗄️"),I("Mouse e mousepad","🖱️"),I("Headsets","🎧"),I("Teclados","⌨️")]},
+{name:"Nível 2",slots:[I("Notebook Acer i7","💻"),I("Notebook Lenovo i3","💻",[{n:"Exemplo – Lenovo i3 formatado",p:"000000"}]),I("Notebook Dell","💻"),I("Notebook Asus","💻"),I("Notebook Samsung","💻"),I("Notebook Megaware","💻")]},
+{name:"Nível 1 (chão)",slots:[I("Base para monitor","📦"),I("Multifuncionais","🖨️")]}]}]}}
+let S,cur=0,openSlot=null,hits=new Set();
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.shelves)S=seed();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const $=id=>document.getElementById(id);
+function el(t,p,...k){const e=document.createElement(t);for(const a in p||{}){if(a==="on")for(const ev in p.on)e.addEventListener(ev,p.on[ev]);else if(a in e&&a!=="list")e[a]=p[a];else e.setAttribute(a,p[a])}k.flat().forEach(c=>e.append(c));return e}
+function findSlot(id){for(const sh of S.shelves)for(const lv of sh.levels)for(const s of lv.slots)if(s.id===id)return{sh,lv,s}}
+function render(){
+ if(cur>=S.shelves.length)cur=0;
+ const tabs=$("tabs");tabs.replaceChildren(...S.shelves.map((s,i)=>el("button",{className:i===cur?"on":"",textContent:s.name,on:{click:()=>{cur=i;render()}}})),
+  el("button",{textContent:"+ Estante",on:{click:async()=>{const r=await ask("Nova estante",[{l:"Nome da estante"}]);if(!r||!r[0])return;const n=r[0];S.shelves.push({id:uid(),name:n,levels:[{name:"Nível 1",slots:[]}]});cur=S.shelves.length-1;save();render()}}}),
+  el("button",{textContent:"Renomear",on:{click:async()=>{const sh=S.shelves[cur],r=await ask("Renomear estante",[{l:"Nome",v:sh.name}]);if(r&&r[0]){sh.name=r[0];save();render()}}}}),
+  S.shelves.length>1?el("button",{className:"del",textContent:"Excluir estante",on:{click:async()=>{if(await sure("Excluir a estante e todos os itens dela?")){S.shelves.splice(cur,1);cur=0;save();render()}}}}):"");
+ const sh=S.shelves[cur];
+ const rack=el("div",{className:"rack"});
+ sh.levels.forEach((lv,li)=>{
+  const L=el("div",{className:"level"},
+   el("div",{className:"lvname"},lv.name,el("button",{title:"Renomear prateleira",textContent:"✎ Renomear",on:{click:async()=>{const r=await ask("Renomear prateleira",[{l:"Nome da prateleira",v:lv.name}]);if(r&&r[0]){lv.name=r[0];save();render()}}}}),
+    el("button",{title:"Excluir prateleira",textContent:"✕ Excluir",on:{click:async()=>{if(!lv.slots.length||await sure("Excluir a prateleira com todos os ícones e itens?")){sh.levels.splice(li,1);save();render()}}}})));
+  lv.slots.forEach(s=>L.append(el("div",{className:"slot"+(hits.has(s.id)?" hit":"")+(s.items.length?"":" empty"),tabIndex:0,role:"button",on:{click:()=>open(s.id),keydown:e=>{if(e.key==="Enter")open(s.id)}}},
+    el("div",{className:"ic",textContent:s.icon}),el("div",{className:"tag"},el("b",{textContent:s.label}),el("span",{className:"n",textContent:s.items.length+(s.items.length===1?" item":" itens")})))));
+  L.append(el("button",{className:"add",textContent:"+ Novo ícone",on:{click:async()=>{const r=await ask("Novo ícone",[{l:"Nome do grupo (ex.: Notebook HP)"},{l:"Emoji do ícone",v:"💻"}]);if(!r||!r[0])return;lv.slots.push(I(r[0],r[1]||"📦"));save();render()}}}));
+  rack.append(L)});
+ rack.append(el("button",{textContent:"+ Novo nível",style:"margin-top:10px",on:{click:async()=>{const r=await ask("Nova prateleira",[{l:"Nome da prateleira",v:"Nova prateleira"}]);if(!r||!r[0])return;sh.levels.unshift({name:r[0],slots:[]});save();render()}}}));
+ $("rack").replaceChildren(rack);
+ drawPanel()}
+function open(id){openSlot=id;drawPanel()}
+function drawPanel(){
+ const box=$("pn");box.replaceChildren();
+ const f=openSlot&&findSlot(openSlot);if(!f){openSlot=null;return}
+ const s=f.s;
+ const nm=el("input",{placeholder:"Nome do equipamento (ex.: Dell Latitude 3420)"}),pt=el("input",{placeholder:"Patrimônio",inputMode:"text"});
+ const add=()=>{if(!nm.value.trim()&&!pt.value.trim())return;s.items.push({n:nm.value.trim(),p:pt.value.trim()});save();render();setTimeout(()=>{const x=$("pn").querySelector("input");x&&x.focus()},0)};
+ pt.addEventListener("keydown",e=>{if(e.key==="Enter")add()});
+ const ul=el("ul",{className:"items"},s.items.length?s.items.map((it,i)=>el("li",{},
+  el("span",{className:"nm",textContent:it.n||"(sem nome)"}),el("span",{className:"pt",textContent:it.p||"s/ patrimônio"}),
+  el("button",{title:"Editar",textContent:"✎",on:{click:async()=>{const r=await ask("Editar equipamento",[{l:"Nome",v:it.n},{l:"Patrimônio",v:it.p}]);if(!r)return;it.n=r[0];it.p=r[1];save();render()}}}),
+  el("button",{className:"del",title:"Remover",textContent:"✕",on:{click:async()=>{if(await sure("Remover este item?")){s.items.splice(i,1);save();render()}}}}))):el("li",{className:"mut",textContent:"Nenhum equipamento aqui ainda. Adicione abaixo."}));
+ box.append(el("div",{className:"panel-bg",on:{click:e=>{if(e.target.classList.contains("panel-bg")){openSlot=null;drawPanel()}}}},
+  el("div",{className:"panel",role:"dialog","aria-label":s.label},
+   el("div",{className:"row"},el("h2",{style:"flex:1",textContent:s.icon+" "+s.label}),el("button",{textContent:"Fechar",on:{click:()=>{openSlot=null;drawPanel()}}})),
+   el("div",{className:"mut",textContent:f.sh.name+" · "+f.lv.name+" · "+s.items.length+" no total"}),
+   ul,
+   el("div",{className:"row"},nm),el("div",{className:"row"},pt,el("button",{className:"pri",textContent:"Adicionar",on:{click:add}})),
+   el("div",{className:"row",style:"margin-top:22px"},
+    el("button",{textContent:"Editar ícone",on:{click:async()=>{const r=await ask("Editar ícone",[{l:"Nome do grupo",v:s.label},{l:"Emoji",v:s.icon}]);if(r&&r[0]){s.label=r[0];s.icon=r[1]||s.icon;save();render()}}}}),
+    el("button",{className:"del",textContent:"Excluir ícone",on:{click:async()=>{if(await sure("Excluir este ícone e todos os itens dele?")){f.lv.slots=f.lv.slots.filter(x=>x!==s);openSlot=null;save();render()}}}})))))}
+$("q").addEventListener("input",e=>{
+ const q=e.target.value.trim().toLowerCase();hits=new Set();const out=[];
+ if(q)for(const sh of S.shelves)for(const lv of sh.levels)for(const s of lv.slots)for(const it of s.items)
+  if((it.n+" "+it.p+" "+s.label).toLowerCase().includes(q)){hits.add(s.id);out.push({sh,s,it})}
+ const r=$("res");r.replaceChildren();
+ if(q){r.className="res";r.append(out.length?out.slice(0,30).map(o=>el("div",{textContent:`${o.it.p||"s/ patrimônio"} – ${o.it.n} (${o.sh.name} › ${o.s.label})`,on:{click:()=>{cur=S.shelves.indexOf(o.sh);render();open(o.s.id)}}})):"Nada encontrado.")}else r.className="";
+ const keep=hits;render();hits=keep});
+function dl(name,txt,type){const a=el("a",{href:URL.createObjectURL(new Blob([txt],{type})),download:name});document.body.append(a);a.click();a.remove()}
+$("exp").onclick=()=>dl("estoque-ti.json",JSON.stringify(S,null,1),"application/json");
+$("csv").onclick=()=>{const q=v=>'"'+String(v).replace(/"/g,'""')+'"';const rows=[["Estante","Nível","Grupo","Equipamento","Patrimônio"]];
+ S.shelves.forEach(sh=>sh.levels.forEach(lv=>lv.slots.forEach(s=>s.items.forEach(it=>rows.push([sh.name,lv.name,s.label,it.n,it.p])))));
+ dl("estoque-ti.csv","\ufeff"+rows.map(r=>r.map(q).join(";")).join("\n"),"text/csv")};
+$("imp").onclick=()=>$("file").click();
+$("file").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(async t=>{let d;try{d=JSON.parse(t);if(!d.shelves)throw 0}catch(x){await sure("Arquivo inválido.");return}if(await sure("Substituir o estoque atual pelo arquivo importado?")){S=d;cur=0;save();render()}})};
+render();
+</script></body></html>
