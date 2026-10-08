@@ -35,6 +35,7 @@ main{padding:14px 18px 40px;max-width:1100px;margin:0 auto}
 .slot{position:relative;z-index:1;width:112px;padding:4px 2px 0;margin-bottom:12px;text-align:center;cursor:pointer;color:#fff;border-radius:10px;transition:transform .15s,background .15s}
 .slot:hover,.slot:focus-visible{transform:translateY(-4px);background:radial-gradient(ellipse at 50% 35%,#ffffff44,transparent 70%)}
 .slot .ic{font-size:54px;line-height:1.15;filter:drop-shadow(0 6px 5px #000a);-webkit-box-reflect:below -4px linear-gradient(transparent 60%,#ffffff22)}
+.ic img{width:64px;height:64px;object-fit:contain;display:block;margin:0 auto}
 .slot .tag{margin-top:6px;font-size:12px;line-height:1.2;text-shadow:0 1px 3px #000}
 .slot .tag b{display:block;font-size:14px;font-weight:600}
 .slot .n{display:inline-block;margin-top:2px;padding:0 8px;border-radius:9px;background:#ffffff1f;font-size:11px;color:#e9eeeb}
@@ -101,12 +102,15 @@ function render(){
    el("div",{className:"lvname"},lv.name,el("button",{title:"Renomear prateleira",textContent:"✎ Renomear",on:{click:async()=>{const r=await ask("Renomear prateleira",[{l:"Nome da prateleira",v:lv.name}]);if(r&&r[0]){lv.name=r[0];save();render()}}}}),
     el("button",{title:"Excluir prateleira",textContent:"✕ Excluir",on:{click:async()=>{if(!lv.slots.length||await sure("Excluir a prateleira com todos os ícones e itens?")){sh.levels.splice(li,1);save();render()}}}})));
   lv.slots.forEach(s=>L.append(el("div",{className:"slot"+(hits.has(s.id)?" hit":"")+(s.items.length?"":" empty"),tabIndex:0,role:"button",on:{click:()=>open(s.id),keydown:e=>{if(e.key==="Enter")open(s.id)}}},
-    el("div",{className:"ic",textContent:s.icon}),el("div",{className:"tag"},el("b",{textContent:s.label}),el("span",{className:"n",textContent:s.items.length+(s.items.length===1?" item":" itens")})))));
-  L.append(el("button",{className:"add",textContent:"+ Novo ícone",on:{click:async()=>{const r=await ask("Novo ícone",[{l:"Nome do grupo (ex.: Notebook HP)"},{l:"Emoji do ícone",v:"💻"}]);if(!r||!r[0])return;lv.slots.push(I(r[0],r[1]||"📦"));save();render()}}}));
+    el("div",{className:"ic"},s.img?el("img",{src:s.img,alt:s.label}):s.icon),el("div",{className:"tag"},el("b",{textContent:s.label}),el("span",{className:"n",textContent:s.items.length+(s.items.length===1?" item":" itens")})))));
+  L.append(el("button",{className:"add",textContent:"+ Novo ícone",on:{click:async()=>{const r=await ask("Novo ícone",[{l:"Nome do grupo (ex.: Notebook HP)"},{l:"Emoji do ícone",v:"💻"}]);if(!r||!r[0])return;const ns=I(r[0],r[1]||"📦");lv.slots.push(ns);openSlot=ns.id;save();render()}}}));
   rack.append(L)});
  rack.append(el("button",{textContent:"+ Novo nível",style:"margin-top:10px",on:{click:async()=>{const r=await ask("Nova prateleira",[{l:"Nome da prateleira",v:"Nova prateleira"}]);if(!r||!r[0])return;sh.levels.unshift({name:r[0],slots:[]});save();render()}}}));
  $("rack").replaceChildren(rack);
  drawPanel()}
+function pickImg(s){const i=el("input",{type:"file",accept:"image/*"});i.onchange=()=>{const f=i.files[0];if(!f)return;const u=URL.createObjectURL(f),im=new Image();
+im.onload=()=>{const k=Math.min(1,192/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);s.img=c.toDataURL("image/webp",.85);URL.revokeObjectURL(u);save();render()};
+im.onerror=()=>sure("Não foi possível ler essa imagem.");im.src=u};i.click()}
 function open(id){openSlot=id;drawPanel()}
 function drawPanel(){
  const box=$("pn");box.replaceChildren();
@@ -121,12 +125,12 @@ function drawPanel(){
   el("button",{className:"del",title:"Remover",textContent:"✕",on:{click:async()=>{if(await sure("Remover este item?")){s.items.splice(i,1);save();render()}}}}))):el("li",{className:"mut",textContent:"Nenhum equipamento aqui ainda. Adicione abaixo."}));
  box.append(el("div",{className:"panel-bg",on:{click:e=>{if(e.target.classList.contains("panel-bg")){openSlot=null;drawPanel()}}}},
   el("div",{className:"panel",role:"dialog","aria-label":s.label},
-   el("div",{className:"row"},el("h2",{style:"flex:1",textContent:s.icon+" "+s.label}),el("button",{textContent:"Fechar",on:{click:()=>{openSlot=null;drawPanel()}}})),
+   el("div",{className:"row"},el("h2",{style:"flex:1",textContent:(s.img?"":s.icon+" ")+s.label}),el("button",{textContent:"Fechar",on:{click:()=>{openSlot=null;drawPanel()}}})),
    el("div",{className:"mut",textContent:f.sh.name+" · "+f.lv.name+" · "+s.items.length+" no total"}),
    ul,
    el("div",{className:"row"},nm),el("div",{className:"row"},pt,el("button",{className:"pri",textContent:"Adicionar",on:{click:add}})),
-   el("div",{className:"row",style:"margin-top:22px"},
-    el("button",{textContent:"Editar ícone",on:{click:async()=>{const r=await ask("Editar ícone",[{l:"Nome do grupo",v:s.label},{l:"Emoji",v:s.icon}]);if(r&&r[0]){s.label=r[0];s.icon=r[1]||s.icon;save();render()}}}}),
+   el("div",{className:"row",style:"margin-top:22px;flex-wrap:wrap"},
+    el("button",{textContent:s.img?"Trocar imagem":"Usar imagem",on:{click:()=>pickImg(s)}}),s.img?el("button",{textContent:"Usar emoji",on:{click:()=>{delete s.img;save();render()}}}):"",el("button",{textContent:"Editar ícone",on:{click:async()=>{const r=await ask("Editar ícone",[{l:"Nome do grupo",v:s.label},{l:"Emoji",v:s.icon}]);if(r&&r[0]){s.label=r[0];s.icon=r[1]||s.icon;save();render()}}}}),
     el("button",{className:"del",textContent:"Excluir ícone",on:{click:async()=>{if(await sure("Excluir este ícone e todos os itens dele?")){f.lv.slots=f.lv.slots.filter(x=>x!==s);openSlot=null;save();render()}}}})))))}
 $("q").addEventListener("input",e=>{
  const q=e.target.value.trim().toLowerCase();hits=new Set();const out=[];
