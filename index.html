@@ -43,6 +43,8 @@ main{padding:14px 18px 40px;max-width:1100px;margin:0 auto}
 .slot.empty .n{background:#b3261e88}
 .add{width:90px;height:90px;margin-bottom:16px;border:0;border-radius:50%;color:#e3e8e5;font-size:12px;background:radial-gradient(circle,#ffffff55 0,#b0bbb544 38%,transparent 70%);z-index:1}
 .add:hover{background:radial-gradient(circle,#ffffffaa 0,#ffffff55 40%,transparent 72%)}
+.hero{display:block;width:100%;height:230px;object-fit:contain;margin:12px 0;padding:12px;border-radius:10px;border:1px solid var(--bd);background:radial-gradient(circle at 50% 40%,#ffffff44,transparent 70%),linear-gradient(#66726c,#434c47)}
+.hero-add{display:block;width:100%;height:90px;margin:12px 0;border:2px dashed var(--mut);background:transparent;color:var(--mut);border-radius:10px}
 .modal{background:var(--paper);padding:18px;border-radius:10px;width:min(380px,92vw);display:flex;flex-direction:column;gap:10px}.modal h2{font-size:19px;margin:0}.modal label{display:flex;flex-direction:column;gap:4px}
 .panel-bg{position:fixed;inset:0;background:#0007;display:flex;justify-content:flex-end;z-index:5}
 .panel{background:var(--paper);width:min(460px,100%);height:100%;overflow:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
@@ -109,7 +111,7 @@ function render(){
  $("rack").replaceChildren(rack);
  drawPanel()}
 function pickImg(s){const i=el("input",{type:"file",accept:"image/*"});i.onchange=()=>{const f=i.files[0];if(!f)return;const u=URL.createObjectURL(f),im=new Image();
-im.onload=()=>{const k=Math.min(1,192/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);s.img=c.toDataURL("image/webp",.85);URL.revokeObjectURL(u);save();render()};
+im.onload=()=>{const k=Math.min(1,480/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);s.img=c.toDataURL("image/webp",.85);URL.revokeObjectURL(u);save();render()};
 im.onerror=()=>sure("Não foi possível ler essa imagem.");im.src=u};i.click()}
 function open(id){openSlot=id;drawPanel()}
 function drawPanel(){
@@ -125,12 +127,12 @@ function drawPanel(){
   el("button",{className:"del",title:"Remover",textContent:"✕",on:{click:async()=>{if(await sure("Remover este item?")){s.items.splice(i,1);save();render()}}}}))):el("li",{className:"mut",textContent:"Nenhum equipamento aqui ainda. Adicione abaixo."}));
  box.append(el("div",{className:"panel-bg",on:{click:e=>{if(e.target.classList.contains("panel-bg")){openSlot=null;drawPanel()}}}},
   el("div",{className:"panel",role:"dialog","aria-label":s.label},
-   el("div",{className:"row"},el("h2",{style:"flex:1",textContent:(s.img?"":s.icon+" ")+s.label}),el("button",{textContent:"Fechar",on:{click:()=>{openSlot=null;drawPanel()}}})),
-   el("div",{className:"mut",textContent:f.sh.name+" · "+f.lv.name+" · "+s.items.length+" no total"}),
+   el("div",{className:"row"},el("h2",{style:"flex:1",textContent:s.label}),el("button",{textContent:"Fechar",on:{click:()=>{openSlot=null;drawPanel()}}})),
+   el("div",{className:"mut",textContent:f.sh.name+" · "+f.lv.name+" · "+s.items.length+" no total"}),s.img?el("img",{className:"hero",src:s.img,alt:s.label}):el("button",{className:"hero-add",textContent:"+ Adicionar imagem do equipamento",on:{click:()=>pickImg(s)}}),
    ul,
    el("div",{className:"row"},nm),el("div",{className:"row"},pt,el("button",{className:"pri",textContent:"Adicionar",on:{click:add}})),
    el("div",{className:"row",style:"margin-top:22px;flex-wrap:wrap"},
-    el("button",{textContent:s.img?"Trocar imagem":"Usar imagem",on:{click:()=>pickImg(s)}}),s.img?el("button",{textContent:"Usar emoji",on:{click:()=>{delete s.img;save();render()}}}):"",el("button",{textContent:"Editar ícone",on:{click:async()=>{const r=await ask("Editar ícone",[{l:"Nome do grupo",v:s.label},{l:"Emoji",v:s.icon}]);if(r&&r[0]){s.label=r[0];s.icon=r[1]||s.icon;save();render()}}}}),
+    el("button",{textContent:s.img?"Trocar imagem":"Usar imagem",on:{click:()=>pickImg(s)}}),s.img?el("button",{textContent:"Remover imagem",on:{click:()=>{delete s.img;save();render()}}}):"",el("button",{textContent:"Editar ícone",on:{click:async()=>{const r=await ask("Editar ícone",[{l:"Nome do grupo",v:s.label},{l:"Emoji",v:s.icon}]);if(r&&r[0]){s.label=r[0];s.icon=r[1]||s.icon;save();render()}}}}),
     el("button",{className:"del",textContent:"Excluir ícone",on:{click:async()=>{if(await sure("Excluir este ícone e todos os itens dele?")){f.lv.slots=f.lv.slots.filter(x=>x!==s);openSlot=null;save();render()}}}})))))}
 $("q").addEventListener("input",e=>{
  const q=e.target.value.trim().toLowerCase();hits=new Set();const out=[];
